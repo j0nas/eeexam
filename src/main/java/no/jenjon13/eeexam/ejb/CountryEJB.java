@@ -6,14 +6,17 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import javax.ejb.Singleton;
+import javax.inject.Named;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+@Named
 @Singleton
 public class CountryEJB {
     private List<String> countries;
@@ -31,7 +34,7 @@ public class CountryEJB {
         Client client = ClientBuilder.newClient();
         Response response = client
                 .target(uri)
-                .request("application/json")
+                .request(MediaType.APPLICATION_JSON_TYPE)
                 .get();
 
         String countriesJson = response.readEntity(String.class);

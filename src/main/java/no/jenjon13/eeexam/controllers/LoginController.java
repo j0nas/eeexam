@@ -1,6 +1,7 @@
 package no.jenjon13.eeexam.controllers;
 
 import no.jenjon13.eeexam.ejb.UserEJB;
+import no.jenjon13.eeexam.entities.User;
 
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
@@ -12,9 +13,15 @@ import java.io.Serializable;
 public class LoginController implements Serializable {
     @Inject
     private UserEJB userEJB;
+    private User user = new User();
     private String formUserName;
     private String formPassword;
     private String loggedInUser;
+    private String country;
+
+    public User getUser() {
+        return user;
+    }
 
     public boolean isLoggedIn() {
         return loggedInUser != null;
@@ -64,5 +71,13 @@ public class LoginController implements Serializable {
 
     public void setFormPassword(String formPassword) {
         this.formPassword = formPassword;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 }
