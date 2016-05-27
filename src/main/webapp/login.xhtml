@@ -13,15 +13,15 @@
         <h:form id="loginForm">
             <h:outputLabel value="User name : "/>
             <h:inputText id="txtUsername" value="#{loginController.formUserName}"/>
-            <br />
+            <br/>
 
             <h:outputLabel value="Password : "/>
             <h:inputText id="txtPassword" value="#{loginController.formPassword}"/>
-            <br />
+            <br/>
 
             <h:commandButton id="btnInitiateLogin" value="Log in" action="#{loginController.logIn}"/>
             <br/>
-            <h:commandButton value="Create new" action="#{loginController.registerNew}"/>
+            <h:button value="Create new" outcome="newUser"/>
             <h:button value="Cancel" outcome="home"/>
         </h:form>
         <hr/>

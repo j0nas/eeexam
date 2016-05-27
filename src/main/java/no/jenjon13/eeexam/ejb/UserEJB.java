@@ -20,26 +20,18 @@ public class UserEJB implements Serializable {
     public UserEJB(){
     }
 
-    public boolean createUser(String userId, String password) {
-        if (userId == null || userId.isEmpty() || password == null || password.isEmpty()) {
+    public boolean createUser(User user, String password) {
+        if (password == null || password.isEmpty() || getUser(user.getUserId()) != null) {
             return false;
         }
-
-        User User = getUser(userId);
-        if (User != null) {
-            return false;
-        }
-
-        User = new User();
-        User.setUserId(userId);
 
         String salt = getSalt();
-        User.setSalt(salt);
+        user.setSalt(salt);
 
         String hash = computeHash(password, salt);
-        User.setHash(hash);
+        user.setHash(hash);
 
-        em.persist(User);
+        em.persist(user);
         return true;
     }
 

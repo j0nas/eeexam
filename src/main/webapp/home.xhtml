@@ -3,14 +3,26 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui" xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
 
 <ui:composition template="layout.xhtml">
     <ui:define name="content">
         <h1 id="pagetitle">Event List Home Page</h1>
         <p:separator/>
+        <c:if test="#{loginController.isLoggedIn()}">
+            <p:commandButton value="Create Event"/>
+            <br/>
+        </c:if>
 
         <h2>Future Events</h2>
+
+        <c:if test="#{loginController.isLoggedIn()}">
+            <p:selectBooleanCheckbox  />
+            <h:outputText value=" Only #{loginController.user.country}" />
+            <br/>
+        </c:if>
+
         No events yet :( Be the first one to create one!
         <p:separator/>
     </ui:define>
