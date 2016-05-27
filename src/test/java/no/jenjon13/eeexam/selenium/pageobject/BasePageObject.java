@@ -1,29 +1,18 @@
-package no.jenjon13.eeexam.selenium;
+package no.jenjon13.eeexam.selenium.pageobject;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class HomePageObject {
-    private final WebDriver driver;
+public abstract class BasePageObject {
+    protected final WebDriver driver;
 
-    public HomePageObject(WebDriver driver) {
+    public BasePageObject(WebDriver driver) {
         this.driver = driver;
     }
 
-    public void toIndexPage() {
-        final String localIndexUrl = String.format("%s:%s%s%s", Config.HOST, Config.PORT, Config.CONTEXT, Config.INDEX);
-        driver.get(localIndexUrl);
-        waitForPageToLoad();
-    }
-
-    public boolean isAtIndexPage() {
-        final String title = driver.getTitle();
-        return title.equals("PG6100 Exam");
-    }
-
-    private Boolean waitForPageToLoad() {
+    public Boolean waitForPageToLoad() {
         JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         WebDriverWait wait = new WebDriverWait(driver, 10);
 

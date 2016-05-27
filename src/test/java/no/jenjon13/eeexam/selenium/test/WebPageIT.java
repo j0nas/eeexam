@@ -1,5 +1,8 @@
-package no.jenjon13.eeexam.selenium;
+package no.jenjon13.eeexam.selenium.test;
 
+import no.jenjon13.eeexam.selenium.conf.Config;
+import no.jenjon13.eeexam.selenium.conf.JBossUtil;
+import no.jenjon13.eeexam.selenium.pageobject.HomePageObject;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -50,7 +53,7 @@ public class WebPageIT {
 
         homePageObject = new HomePageObject(driver);
         homePageObject.toIndexPage();
-        assertTrue(homePageObject.isAtIndexPage());
+        assertTrue(homePageObject.isAtHomePage());
     }
 
     @Test
@@ -58,6 +61,45 @@ public class WebPageIT {
         final By elementIdentifier = By.id("pagetitle");
         WebElement text = driver.findElement(elementIdentifier);
         String value = text.getText();
-        assertEquals("Event List Home Page", value); //FIXME
+        assertEquals("Event List Home Page", value);
+    }
+
+    @Test
+    public void testLoginLink() {
+        navigateToLoginPage();
+        assertTrue(isOnLoginPage());
+    }
+
+    private boolean isOnLoginPage() {
+        By byPageTitle = By.id("pagetitle");
+        WebElement element = driver.findElement(byPageTitle);
+        String elementText = element.getText();
+        return elementText.equals("Login");
+    }
+
+    private void navigateToLoginPage() {
+        By byBtnLoginId = By.id("btnLogin");
+        WebElement webElement = driver.findElement(byBtnLoginId);
+        webElement.click();
+        homePageObject.waitForPageToLoad();
+    }
+
+    @Test
+    public void testLoginWrongUser() {
+        navigateToLoginPage();
+        By byTxtUsername = By.id("loginForm:txtUsername");
+        WebElement usernameWebElement = driver.findElement(byTxtUsername);
+        usernameWebElement.sendKeys("WRONG USERNAME");
+
+        By byTxtPassword = By.id("loginForm:txtPassword");
+        WebElement passwordWebElement = driver.findElement(byTxtPassword);
+        passwordWebElement.sendKeys("WRONG PASSWORD");
+
+        By byBtnInitiateLogin = By.id("loginForm:btnInitiateLogin");
+        WebElement loginBtnWebElement = driver.findElement(byBtnInitiateLogin);
+        loginBtnWebElement.click();
+
+        homePageObject.waitForPageToLoad();
+        assertTrue(isOnLoginPage());
     }
 }
