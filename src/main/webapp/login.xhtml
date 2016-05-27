@@ -13,12 +13,16 @@
         <h:form id="loginForm">
             <p:outputLabel value="User name : "/>
             <p:inputText value="#{loginController.formUserName}"/>
+            <br />
+
             <p:outputLabel value="Password : "/>
             <p:inputText value="#{loginController.formPassword}"/>
+            <br />
+
             <p:commandButton value="Log in" action="#{loginController.logIn}"/>
             <br/>
             <p:commandButton value="Create new" action="#{loginController.registerNew}"/>
-            <p:commandButton value="Cancel" action="#{loginController.logOut}"/>
+            <p:button value="Cancel" outcome="home"/>
         </h:form>
         <p:separator/>
     </ui:define>

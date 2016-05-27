@@ -11,10 +11,18 @@
 </h:head>
 <h:body>
     PG6100 Exam
-    <p:separator />
-    Not logged in &nbsp;
-    <c:if test="true">
-        <h:commandButton value="Log in" />
+    <p:separator/>
+    <c:if test="#{!loginController.loggedIn}">
+        Not logged in &nbsp;
+        <h:button value="Log in" outcome="login"/>
+    </c:if>
+
+    <c:if test="#{loginController.loggedIn}">
+        Hi #{loginController.loggedInUser}!
+        <br/>
+        <h:form id="logoutForm">
+            <h:commandButton value="Log Out" action="#{loginController.logOut}"/>
+        </h:form>
     </c:if>
 
     <ui:insert name="content">Default content</ui:insert>

@@ -14,18 +14,18 @@ public class LoginController implements Serializable {
     private UserEJB userEJB;
     private String formUserName;
     private String formPassword;
-    private String registeredUser;
+    private String loggedInUser;
 
     public boolean isLoggedIn() {
-        return registeredUser != null;
+        return loggedInUser != null;
     }
 
-    public String getRegisteredUser() {
-        return registeredUser;
+    public String getLoggedInUser() {
+        return loggedInUser;
     }
 
     public String logOut() {
-        registeredUser = null;
+        loggedInUser = null;
         return "index.html";
     }
 
@@ -33,7 +33,7 @@ public class LoginController implements Serializable {
     public String logIn() {
         boolean valid = userEJB.login(formUserName, formPassword);
         if (valid) {
-            registeredUser = formUserName;
+            loggedInUser = formUserName;
             return "home.xhtml?faces-redirect=true";
         } else {
             return "login.xhtml";
@@ -43,7 +43,7 @@ public class LoginController implements Serializable {
     public String registerNew() {
         boolean registered = userEJB.createUser(formUserName, formPassword);
         if (registered) {
-            registeredUser = formUserName;
+            loggedInUser = formUserName;
             return "home.xhtml?faces-redirect=true";
         } else {
             return "login.xhtml";
