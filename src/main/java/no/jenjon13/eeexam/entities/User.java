@@ -24,16 +24,15 @@ public class User {
     @Size(max = 26)
     private String salt;
 
-//    @NotNull
-//    @Size(max = 50)
-//    private String country;
-//
-//    @NotNull
-//    private String firstName;
-//    @NotNull
-//    private String middleName;
-//    @NotNull
-//    private String lastName;
+    @NotNull
+    @Size(max = 50)
+    private String country;
+    @NotNull
+    private String firstName;
+    @NotNull
+    private String middleName;
+    @NotNull
+    private String lastName;
 
     public String getUserId() {
         return userId;
@@ -59,35 +58,35 @@ public class User {
         this.salt = salt;
     }
 
-//    public String getCountry() {
-//        return country;
-//    }
-//
-//    public void setCountry(String country) {
-//        this.country = country;
-//    }
-//
-//    public String getLastName() {
-//        return lastName;
-//    }
-//
-//    public void setLastName(String lastName) {
-//        this.lastName = lastName;
-//    }
-//
-//    public String getMiddleName() {
-//        return middleName;
-//    }
-//
-//    public void setMiddleName(String middleName) {
-//        this.middleName = middleName;
-//    }
-//
-//    public String getFirstName() {
-//        return firstName;
-//    }
-//
-//    public void setFirstName(String firstName) {
-//        this.firstName = firstName;
-//    }
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getMiddleName() {
+        return middleName;
+    }
+
+    public void setMiddleName(String middleName) {
+        this.middleName = middleName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 }

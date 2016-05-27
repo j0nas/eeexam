@@ -1,5 +1,6 @@
 package no.jenjon13.eeexam.controllers;
 
+import no.jenjon13.eeexam.ejb.CountryEJB;
 import no.jenjon13.eeexam.ejb.UserEJB;
 import no.jenjon13.eeexam.entities.User;
 
@@ -7,6 +8,7 @@ import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serializable;
+import java.util.List;
 
 @Named
 @SessionScoped
@@ -16,46 +18,9 @@ public class LoginController implements Serializable {
     private User user = new User();
     private String formUserName;
     private String formPassword;
-    private String loggedInUser;
-    private String country;
-
-    public User getUser() {
-        return user;
-    }
-
-    public boolean isLoggedIn() {
-        return loggedInUser != null;
-    }
-
-    public String getLoggedInUser() {
-        return loggedInUser;
-    }
-
-    public String logOut() {
-        loggedInUser = null;
-        return "index.html";
-    }
-
-
-    public String logIn() {
-        boolean valid = userEJB.login(formUserName, formPassword);
-        if (valid) {
-            loggedInUser = formUserName;
-            return "home.xhtml?faces-redirect=true";
-        } else {
-            return "login.xhtml";
-        }
-    }
-
-    public String registerNew() {
-        boolean registered = userEJB.createUser(formUserName, formPassword);
-        if (registered) {
-            loggedInUser = formUserName;
-            return "home.xhtml?faces-redirect=true";
-        } else {
-            return "login.xhtml";
-        }
-    }
+    private User loggedInUser;
+    @Inject
+    private CountryEJB countryEJB;
 
     public String getFormUserName() {
         return formUserName;
@@ -65,19 +30,52 @@ public class LoginController implements Serializable {
         this.formUserName = formUserName;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public List<String> getCountries() {
+        return countryEJB.getCountries();
+    }
+
+    public boolean isLoggedIn() {
+        return loggedInUser != null;
+    }
+
+    public String getLoggedInUserId() {
+        return loggedInUser.getUserId();
+    }
+
+    public String logOut() {
+        loggedInUser = null;
+        return "index.html";
+    }
+
+    public String logIn() {
+        boolean valid = userEJB.login(user.getUserId(), formPassword);
+        if (valid) {
+            loggedInUser = user;
+            return "home.xhtml?faces-redirect=true";
+        } else {
+            return "login.xhtml";
+        }
+    }
+
+    public String registerNew() {
+        boolean registered = userEJB.createUser(user, formPassword);
+        if (registered) {
+            loggedInUser = user;
+            return "home.xhtml?faces-redirect=true";
+        } else {
+            return "login.xhtml";
+        }
+    }
+
     public String getFormPassword() {
         return formPassword;
     }
 
     public void setFormPassword(String formPassword) {
         this.formPassword = formPassword;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
     }
 }

@@ -6,19 +6,18 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import javax.ejb.Singleton;
-import javax.inject.Named;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-@Named
 @Singleton
-public class CountryEJB {
+public class CountryEJB implements Serializable {
     private List<String> countries;
 
     public List<String> getCountries() {
