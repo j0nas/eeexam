@@ -16,7 +16,14 @@ import java.util.List;
 
 @Singleton
 public class CountryEJB {
+    private List<String> countries;
+
     public List<String> getCountries() {
+        if (countries != null) {
+            return countries;
+        }
+
+        countries = new ArrayList<>();
         URI uri = UriBuilder
                 .fromUri("http://restcountries.eu/rest/v1/all")
                 .port(80)
@@ -27,13 +34,11 @@ public class CountryEJB {
                 .request("application/json")
                 .get();
 
-
         String countriesJson = response.readEntity(String.class);
 
         JsonParser jsonParser = new JsonParser();
         JsonArray jsonArray = (JsonArray) jsonParser.parse(countriesJson);
 
-        List<String> countries = new ArrayList<>();
         for (JsonElement element : jsonArray) {
             JsonObject jsonObject = element.getAsJsonObject();
             JsonElement nameJsonElement = jsonObject.get("name");
