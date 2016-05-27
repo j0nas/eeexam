@@ -3,28 +3,28 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui" xmlns:h="http://java.sun.com/jsf/html">
+      xmlns:h="http://java.sun.com/jsf/html">
 
 <ui:composition template="layout.xhtml">
     <ui:define name="content">
         <h1 id="pagetitle">Login</h1>
-        <p:separator/>
+        <hr/>
 
         <h:form id="loginForm">
-            <p:outputLabel value="User name : "/>
-            <p:inputText value="#{loginController.formUserName}"/>
+            <h:outputLabel value="User name : "/>
+            <h:inputText id="txtUsername" value="#{loginController.formUserName}"/>
             <br />
 
-            <p:outputLabel value="Password : "/>
-            <p:inputText value="#{loginController.formPassword}"/>
+            <h:outputLabel value="Password : "/>
+            <h:inputText id="txtPassword" value="#{loginController.formPassword}"/>
             <br />
 
-            <p:commandButton value="Log in" action="#{loginController.logIn}"/>
+            <h:commandButton id="btnInitiateLogin" value="Log in" action="#{loginController.logIn}"/>
             <br/>
-            <p:commandButton value="Create new" action="#{loginController.registerNew}"/>
-            <p:button value="Cancel" outcome="home"/>
+            <h:commandButton value="Create new" action="#{loginController.registerNew}"/>
+            <h:button value="Cancel" outcome="home"/>
         </h:form>
-        <p:separator/>
+        <hr/>
     </ui:define>
 </ui:composition>
 </html>

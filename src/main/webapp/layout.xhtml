@@ -14,7 +14,7 @@
     <p:separator/>
     <c:if test="#{!loginController.loggedIn}">
         Not logged in &nbsp;
-        <h:button value="Log in" outcome="login"/>
+        <h:button value="Log in" id="btnLogin" outcome="login"/>
     </c:if>
 
     <c:if test="#{loginController.loggedIn}">

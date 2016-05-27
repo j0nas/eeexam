@@ -1,4 +1,4 @@
-package no.jenjon13.eeexam.selenium;
+package no.jenjon13.eeexam.selenium.conf;
 
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;

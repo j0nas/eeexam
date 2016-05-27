@@ -1,4 +1,4 @@
-package no.jenjon13.eeexam.selenium;
+package no.jenjon13.eeexam.selenium.conf;
 
 public final class Config {
     public static final String FIREFOX_BINARY_PATH = "D:\\Firefox\\firefox.exe";
