@@ -15,11 +15,11 @@
             <p:inputText value="#{loginController.formUserName}"/>
             <p:outputLabel value="Password : "/>
             <p:inputText value="#{loginController.formPassword}"/>
-            <p:commandButton value="Log in"/>
+            <p:commandButton value="Log in" action="#{loginController.logIn}"/>
+            <br/>
+            <p:commandButton value="Create new" action="#{loginController.registerNew}"/>
+            <p:commandButton value="Cancel" action="#{loginController.logOut}"/>
         </h:form>
-        <br/>
-        <p:commandButton value="Create new"/>
-        <p:commandButton value="Cancel"/>
         <p:separator/>
     </ui:define>
 </ui:composition>
