@@ -25,15 +25,15 @@
                 <p:message for="password2"/>
 
                 <p:outputLabel for="firstname" value="First name :"/>
-                <p:password id="firstname" value="#{loginController.user.firstName}" feedback="true" required="true"/>
+                <p:inputText id="firstname" value="#{loginController.user.firstName}" required="true"/>
                 <p:message for="firstname"/>
 
                 <p:outputLabel for="middlename" value="Middle name :"/>
-                <p:password id="middlename" value="#{loginController.user.middleName}" feedback="true" required="true"/>
+                <p:inputText id="middlename" value="#{loginController.user.middleName}" />
                 <p:message for="middlename"/>
 
                 <p:outputLabel for="lastname" value="Last name :"/>
-                <p:password id="lastname" value="#{loginController.user.lastName}" feedback="true" required="true"/>
+                <p:inputText id="lastname" value="#{loginController.user.lastName}" required="true"/>
                 <p:message for="lastname"/>
 
                 <p:outputLabel for="country" value="Country :"/>

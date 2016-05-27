@@ -29,7 +29,7 @@ public class User {
     private String country;
     @NotNull
     private String firstName;
-    @NotNull
+
     private String middleName;
     @NotNull
     private String lastName;
