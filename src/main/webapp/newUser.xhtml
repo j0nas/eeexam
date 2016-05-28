@@ -37,13 +37,13 @@
                 <p:message for="lastname"/>
 
                 <p:outputLabel for="country" value="Country :"/>
-                <p:selectOneMenu id="country" value="#{loginController.user.country}">
+                <h:selectOneMenu id="country" value="#{loginController.user.country}">
                     <f:selectItems value="#{loginController.getCountries()}" />
-                </p:selectOneMenu>
+                </h:selectOneMenu>
                 <p:message for="country"/>
             </h:panelGrid>
 
-            <p:commandButton value="Submit" ajax="false" action="#{loginController.registerNew}"
+            <p:commandButton value="Submit" id="submit" ajax="false" action="#{loginController.registerNew}"
                              icon="ui-icon ui-icon-disk"/>
         </h:form>
 
