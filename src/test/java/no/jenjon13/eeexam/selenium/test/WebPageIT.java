@@ -163,45 +163,79 @@ public class WebPageIT {
     @Test
     public void testCreateOneEvent() throws Exception {
         createUser();
-        final int amountOfDisplayedEvents = createEventPageObject.getAmountOfDisplayedEvents();
+        final int amountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
         createEvent("Norway");
-        final int newAmountOfDisplayedEvents = createEventPageObject.getAmountOfDisplayedEvents();
+        final int newAmountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
 
         assertEquals(amountOfDisplayedEvents + 1, newAmountOfDisplayedEvents);
         assertTrue(0 < eventEJB.deleteAllEvents());
         homePageObject.clickLogoutButton();
     }
 
-    private void createEvent(String country) {
+    // TODO remove return from this if not used
+    private String createEvent(String country) {
         homePageObject.clickCreateEventButton();
         assertTrue(createEventPageObject.isOnEventPage());
-        createEventPageObject.fillOutEventDataAndSubmit(country);
+        return createEventPageObject.fillOutEventDataAndSubmit(country);
     }
 
     @Test
     public void testCreateEventInDifferentCountries() throws Exception {
         createUser();
-        final int amountOfDisplayedEvents = createEventPageObject.getAmountOfDisplayedEvents();
+        final int amountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
         createEvent("Norway");
         createEvent("Sweden");
+
+        setOnlyCurrentCountryCheckBox(false);
+        final int newAmountOfEvents = homePageObject.getAmountOfDisplayedEvents();
+        assertEquals(amountOfDisplayedEvents + 1, newAmountOfEvents);
+
+        setOnlyCurrentCountryCheckBox(true);
+        final int updatedAmountOfEvents = homePageObject.getAmountOfDisplayedEvents();
+        assertEquals(amountOfDisplayedEvents + 2, updatedAmountOfEvents);
+
+//        eventEJB.deleteAllEvents(); TODO
+        homePageObject.clickLogoutButton();
+    }
+
+    private boolean toggled = false;
+    private void setOnlyCurrentCountryCheckBox(boolean checked) {
+        if (!toggled) {
+            checked = !checked; // TODO
+            toggled = true;
+        }
 
         final By byOnlyCurrentCountryCheckbox = By.id("dataForm:onlyCurrentCountry");
         final WebElement checkboxElement = driver.findElement(byOnlyCurrentCountryCheckbox);
         final boolean onlyShowCurrentCountryChecked = checkboxElement.isSelected();
 
-        if (!onlyShowCurrentCountryChecked) {
+        if (onlyShowCurrentCountryChecked && !checked) {
             checkboxElement.click();
         }
 
-        final int newAmountOfEvents = createEventPageObject.getAmountOfDisplayedEvents();
-        assertEquals(amountOfDisplayedEvents + 1, newAmountOfEvents);
+        if (!onlyShowCurrentCountryChecked && checked) {
+            checkboxElement.click();
+        }
+    }
 
-        checkboxElement.click();
-        final int updatedAmountOfEvents = createEventPageObject.getAmountOfDisplayedEvents();
-        assertEquals(amountOfDisplayedEvents + 2, updatedAmountOfEvents);
-
-//        eventEJB.deleteAllEvents(); TODO
+    @Test
+    public void testCreateEventsFromDifferentUsers() throws Exception {
+        createUser();
+        final int amountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
+        createEvent("Norway");
         homePageObject.clickLogoutButton();
+
+        createUser();
+        createEvent("Sweden");
+        setOnlyCurrentCountryCheckBox(false);
+        Thread.sleep(500);
+        final int newAmountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
+        assertEquals(amountOfDisplayedEvents + 2, newAmountOfDisplayedEvents);
+
+        setOnlyCurrentCountryCheckBox(true);
+        Thread.sleep(500);
+        final int updatedAmountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
+        assertEquals(amountOfDisplayedEvents + 1, updatedAmountOfDisplayedEvents);
     }
 
     private void enterTextIntoField(String textToEnter, String id) {

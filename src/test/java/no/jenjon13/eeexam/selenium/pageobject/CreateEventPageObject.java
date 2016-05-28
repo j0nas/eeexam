@@ -13,7 +13,7 @@ public class CreateEventPageObject extends BasePageObject {
     }
 
 
-    public void fillOutEventDataAndSubmit(String country) {
+    public String fillOutEventDataAndSubmit(String country) {
         final String[] fields = new String[] {"title", "location", "description"};
         String testString = "TEST " + ((int) (Math.random() * 10000));
 
@@ -33,6 +33,8 @@ public class CreateEventPageObject extends BasePageObject {
         WebElement submitWebElement = driver.findElement(byBtnSubmit);
         submitWebElement.click();
         waitForPageToLoad();
+
+        return testString;
     }
 
     public boolean isOnEventPage() {
@@ -46,18 +48,5 @@ public class CreateEventPageObject extends BasePageObject {
         final WebElement firstElement = titleElements.get(0);
         final String titleElementText = firstElement.getText();
         return titleElementText.contains("Create New Event");
-    }
-
-    public int getAmountOfDisplayedEvents() {
-        final By byDataTable = By.id("dataForm:eventdata_data");
-        final List<WebElement> dataTable = driver.findElements(byDataTable);
-        if (dataTable.size() == 0) {
-            return 0;
-        }
-
-        final WebElement rows = dataTable.get(0);
-        final By byClassName = By.className("ui-widget-content");
-        final List<WebElement> elements = rows.findElements(byClassName);
-        return elements.size();
     }
 }
