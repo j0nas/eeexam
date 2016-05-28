@@ -42,13 +42,8 @@ public class WebPageIT {
         }
     }
 
-    @AfterClass
-    public static void tearDown() {
-        driver.quit();
-    }
-
     @Before
-    public void startFromInitialPage() {
+    public void setUp() throws Exception {
         assumeTrue(JBossUtil.isJBossUpAndRunning());
 
         homePageObject = new HomePageObject(driver);
@@ -57,6 +52,11 @@ public class WebPageIT {
 
         homePageObject.toIndexPage();
         assertTrue(homePageObject.isAtHomePage());
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        driver.quit();
     }
 
     @Test
@@ -76,13 +76,9 @@ public class WebPageIT {
     @Test
     public void testLoginWrongUser() {
         loginPageObject.navigateToLoginPage();
-        By byTxtUsername = By.id("loginForm:txtUsername");
-        WebElement usernameWebElement = driver.findElement(byTxtUsername);
-        usernameWebElement.sendKeys("WRONG USERNAME");
 
-        By byTxtPassword = By.id("loginForm:txtPassword");
-        WebElement passwordWebElement = driver.findElement(byTxtPassword);
-        passwordWebElement.sendKeys("WRONG PASSWORD");
+        enterTextIntoField("WRONG USERNAME", "loginForm:txtUsername");
+        enterTextIntoField("WRONG PASSWORD", "loginForm:txtPassword");
 
         By byBtnInitiateLogin = By.id("loginForm:btnInitiateLogin");
         WebElement loginBtnWebElement = driver.findElement(byBtnInitiateLogin);
@@ -126,9 +122,36 @@ public class WebPageIT {
         assertTrue(notLoggedInText.contains("Not logged in"));
     }
 
-    @Ignore
+    @Test
     public void testLogin() throws Exception {
         loginPageObject.navigateToLoginPage();
         loginPageObject.clickLoginFormCreateNewUser();
+        String usernameAndPassword = newUserPageObject.fillOutUserFormAndSubmit(true);
+
+        homePageObject.clickLogoutButton();
+        loginPageObject.navigateToLoginPage();
+
+        enterTextIntoField(usernameAndPassword, "loginForm:txtUsername");
+        enterTextIntoField(usernameAndPassword, "loginForm:txtPassword");
+
+        By byBtnInitiateLogin = By.id("loginForm:btnInitiateLogin");
+        WebElement loginBtnWebElement = driver.findElement(byBtnInitiateLogin);
+        loginBtnWebElement.click();
+        homePageObject.waitForPageToLoad();
+
+        assertTrue(homePageObject.isAtHomePage());
+
+        By byWelcomeMessage = By.id("welcomeMessage");
+        String welcomeMessageText = driver.findElement(byWelcomeMessage).getText();
+        assertTrue(welcomeMessageText.contains("Hi " + usernameAndPassword));
+
+        homePageObject.clickLogoutButton();
+    }
+
+    private void enterTextIntoField(String textToEnter, String id) {
+        By byTxtPassword = By.id(id);
+        WebElement passwordWebElement = driver.findElement(byTxtPassword);
+        passwordWebElement.clear();
+        passwordWebElement.sendKeys(textToEnter);
     }
 }

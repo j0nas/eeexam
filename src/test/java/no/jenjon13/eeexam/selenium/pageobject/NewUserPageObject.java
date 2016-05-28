@@ -20,6 +20,7 @@ public class NewUserPageObject extends BasePageObject {
         for (String field : fields) {
             By byTxtField = By.id("userform:" + field);
             WebElement txtWebElement = driver.findElement(byTxtField);
+            txtWebElement.clear();
 
             boolean currentFieldIsMatchingPasswordField = field.equals("password2") && !matchingPassword;
             String stringToType = currentFieldIsMatchingPasswordField ? "DIFFERENT PASSWORD" : combinedTestValue;
