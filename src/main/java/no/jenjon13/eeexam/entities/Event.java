@@ -5,9 +5,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
-@NamedQuery(name = Event.DELETE_ALL, query = "DELETE FROM User")
+@NamedQuery(name = Event.DELETE_ALL, query = "DELETE FROM Event")
 public class Event {
-    public static final String DELETE_ALL = "delete_all";
+    public static final String DELETE_ALL = "events_delete_all";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
