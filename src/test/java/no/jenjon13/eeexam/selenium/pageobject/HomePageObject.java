@@ -5,6 +5,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import java.util.List;
+
 public class HomePageObject extends BasePageObject {
     public HomePageObject(WebDriver driver) {
         super(driver);
@@ -25,8 +27,35 @@ public class HomePageObject extends BasePageObject {
 
     public void clickLogoutButton() {
         By byBtnLogout = By.id("logoutForm:btnLogout");
-        WebElement logoutBtnWebElement = driver.findElement(byBtnLogout);
+
+        final List<WebElement> elements = driver.findElements(byBtnLogout);
+        if (elements.isEmpty()) {
+            return;
+        }
+
+        WebElement logoutBtnWebElement = elements.get(0);
         logoutBtnWebElement.click();
         waitForPageToLoad();
     }
+
+    public void clickCreateEventButton() {
+        final By btnCreateNewEvent = By.id("btnCreateNewEvent");
+        final WebElement btnCreateNewEventWebElement = driver.findElement(btnCreateNewEvent);
+        btnCreateNewEventWebElement.click();
+        waitForPageToLoad();
+    }
+
+    public int getAmountOfDisplayedEvents() {
+        final By byDataTable = By.id("dataForm:eventdata_data");
+        final List<WebElement> dataTable = driver.findElements(byDataTable);
+        if (dataTable.size() == 0) {
+            return 0;
+        }
+
+        final WebElement rows = dataTable.get(0);
+        final By byClassName = By.className("ui-widget-content");
+        final List<WebElement> elements = rows.findElements(byClassName);
+        return elements.size();
+    }
+
 }

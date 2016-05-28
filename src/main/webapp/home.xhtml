@@ -11,19 +11,47 @@
         <h1 id="pagetitle">Event List Home Page</h1>
         <p:separator/>
         <c:if test="#{loginController.isLoggedIn()}">
-            <p:commandButton value="Create Event"/>
+            <p:button id="btnCreateNewEvent" value="Create Event" outcome="newEvent" />
             <br/>
         </c:if>
 
         <h2>Future Events</h2>
 
-        <c:if test="#{loginController.isLoggedIn()}">
-            <p:selectBooleanCheckbox  />
+
+        <c:if test="#{eventController.hasNoEvents()}">
+            No events yet :( Be the first one to create one!
+        </c:if>
+
+        <h:form id="dataForm">
+        <c:if test="#{!eventController.hasNoEvents()}">
+            <p:dataTable id="eventdata" var="event" value="#{eventController.getEvents()}">
+                <p:column headerText="Country">
+                    <h:outputText value="#{event.country}"/>
+                </p:column>
+                <p:column headerText="Title">
+                    <h:outputText value="#{event.title}"/>
+                </p:column>
+                <p:column headerText="Location">
+                    <h:outputText value="#{event.location}"/>
+                </p:column>
+                <p:column headerText="Participants">
+                    0
+                </p:column>
+                <p:column headerText="Going">
+                    <p:selectBooleanCheckbox />
+                </p:column>
+            </p:dataTable>
+        </c:if>
+
+        <c:if test="#{eventController.shouldDisplayCountryCheckbox()}">
+            <p:selectBooleanCheckbox id="onlyCurrentCountry" value="#{eventController.onlyShowForCurrentCountry}">
+                <p:ajax update="dataForm:eventdata" listener="#{eventController.updateDisplayedEvents()}" />
+            </p:selectBooleanCheckbox>
             <h:outputText value=" Only #{loginController.user.country}" />
             <br/>
         </c:if>
+        </h:form>
 
-        No events yet :( Be the first one to create one!
         <p:separator/>
     </ui:define>
 </ui:composition>

@@ -10,7 +10,6 @@ public class NewUserPageObject extends BasePageObject {
         super(driver);
     }
 
-
     public String fillOutUserFormAndSubmit(boolean matchingPassword) {
         final String testValue = "Test";
         int randomSuffix = (int) (Math.random() * 10000);

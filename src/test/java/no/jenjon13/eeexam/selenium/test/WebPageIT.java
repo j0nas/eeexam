@@ -1,7 +1,9 @@
 package no.jenjon13.eeexam.selenium.test;
 
+import no.jenjon13.eeexam.ejb.EventEJB;
 import no.jenjon13.eeexam.selenium.conf.Config;
 import no.jenjon13.eeexam.selenium.conf.JBossUtil;
+import no.jenjon13.eeexam.selenium.pageobject.CreateEventPageObject;
 import no.jenjon13.eeexam.selenium.pageobject.HomePageObject;
 import no.jenjon13.eeexam.selenium.pageobject.LoginPageObject;
 import no.jenjon13.eeexam.selenium.pageobject.NewUserPageObject;
@@ -14,7 +16,9 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import javax.inject.Inject;
 import java.io.File;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
@@ -24,6 +28,11 @@ public class WebPageIT {
     private HomePageObject homePageObject;
     private LoginPageObject loginPageObject;
     private NewUserPageObject newUserPageObject;
+    private CreateEventPageObject createEventPageObject;
+
+    @Inject
+    private EventEJB eventEJB;
+    private boolean toggled;
 
     @BeforeClass
     public static void init() throws InterruptedException {
@@ -42,21 +51,23 @@ public class WebPageIT {
         }
     }
 
+    @AfterClass
+    public static void tearDown() {
+        driver.quit();
+    }
+
     @Before
     public void setUp() throws Exception {
+        toggled = false;
         assumeTrue(JBossUtil.isJBossUpAndRunning());
 
         homePageObject = new HomePageObject(driver);
         loginPageObject = new LoginPageObject(driver);
         newUserPageObject = new NewUserPageObject(driver);
+        createEventPageObject = new CreateEventPageObject(driver);
 
         homePageObject.toIndexPage();
         assertTrue(homePageObject.isAtHomePage());
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        driver.quit();
     }
 
     @Test
@@ -88,7 +99,6 @@ public class WebPageIT {
         assertTrue(loginPageObject.isOnLoginPage());
     }
 
-
     @Test
     public void testCreateUserFailDueToPasswordMismatch() throws Exception {
         loginPageObject.navigateToLoginPage();
@@ -98,10 +108,15 @@ public class WebPageIT {
         newUserPageObject.fillOutUserFormAndSubmit(false);
         String newUrl = driver.getCurrentUrl();
         Assert.assertTrue(newUrl.equals(currentUrl));
+
+        homePageObject.toIndexPage();
     }
 
     @Test
     public void testCreateValidUser() throws Exception {
+        homePageObject.toIndexPage();
+        homePageObject.clickLogoutButton();
+
         loginPageObject.navigateToLoginPage();
         String currentUrl = driver.getCurrentUrl();
         loginPageObject.clickLoginFormCreateNewUser();
@@ -124,9 +139,7 @@ public class WebPageIT {
 
     @Test
     public void testLogin() throws Exception {
-        loginPageObject.navigateToLoginPage();
-        loginPageObject.clickLoginFormCreateNewUser();
-        String usernameAndPassword = newUserPageObject.fillOutUserFormAndSubmit(true);
+        String usernameAndPassword = createUser();
 
         homePageObject.clickLogoutButton();
         loginPageObject.navigateToLoginPage();
@@ -145,6 +158,109 @@ public class WebPageIT {
         String welcomeMessageText = driver.findElement(byWelcomeMessage).getText();
         assertTrue(welcomeMessageText.contains("Hi " + usernameAndPassword));
 
+        homePageObject.clickLogoutButton();
+    }
+
+    private String createUser() {
+        homePageObject.toIndexPage();
+
+        homePageObject.clickLogoutButton();
+        homePageObject.waitForPageToLoad();
+        homePageObject.toIndexPage();
+
+
+        loginPageObject.navigateToLoginPage();
+        loginPageObject.clickLoginFormCreateNewUser();
+        return newUserPageObject.fillOutUserFormAndSubmit(true);
+    }
+
+    @Test
+    public void testCreateOneEvent() throws Exception {
+        createUser();
+        final int amountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
+        createEvent("Norway");
+        final int newAmountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
+
+        assertEquals(amountOfDisplayedEvents + 1, newAmountOfDisplayedEvents);
+//        assertTrue(0 < eventEJB.deleteAllEvents());
+        homePageObject.clickLogoutButton();
+    }
+
+    // TODO remove return from this if not used
+    private String createEvent(String country) {
+        homePageObject.clickCreateEventButton();
+        assertTrue(createEventPageObject.isOnEventPage());
+        return createEventPageObject.fillOutEventDataAndSubmit(country);
+    }
+
+    @Test
+    public void testCreateEventInDifferentCountries() throws Exception {
+        createUser();
+        final int amountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
+        createEvent("Norway");
+        createEvent("Sweden");
+
+        setOnlyCurrentCountryCheckBox(false);
+        Thread.sleep(500);
+        final int newAmountOfEvents = homePageObject.getAmountOfDisplayedEvents();
+        assertEquals(amountOfDisplayedEvents + 2, newAmountOfEvents);
+
+        setOnlyCurrentCountryCheckBox(true);
+        Thread.sleep(500);
+        final int updatedAmountOfEvents = homePageObject.getAmountOfDisplayedEvents();
+        assertEquals(amountOfDisplayedEvents + 1, updatedAmountOfEvents);
+
+//        eventEJB.deleteAllEvents(); TODO
+        homePageObject.clickLogoutButton();
+    }
+
+    private void setOnlyCurrentCountryCheckBox(boolean checked) {
+        final By byOnlyCurrentCountryCheckbox = By.id("dataForm:onlyCurrentCountry");
+        final List<WebElement> checkboxElements = driver.findElements(byOnlyCurrentCountryCheckbox);
+        if (checkboxElements.isEmpty()) {
+            return;
+        }
+
+        if (!toggled) {
+            checked = !checked; // TODO
+            toggled = true;
+        }
+
+        final WebElement checkboxElement = checkboxElements.get(0);
+
+        final boolean onlyShowCurrentCountryChecked = checkboxElement.isSelected();
+
+        // TODO xor?
+        if (onlyShowCurrentCountryChecked && !checked) {
+            checkboxElement.click();
+        }
+
+        if (!onlyShowCurrentCountryChecked && checked) {
+            checkboxElement.click();
+        }
+    }
+
+    @Test
+    public void testCreateEventsFromDifferentUsers() throws Exception {
+        createUser();
+
+        Thread.sleep(500);
+        setOnlyCurrentCountryCheckBox(false);
+        Thread.sleep(500);
+        final int initialAmountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
+
+        createEvent("Norway");
+        homePageObject.clickLogoutButton();
+
+        toggled = false;
+        createUser();
+        createEvent("Sweden");
+        Thread.sleep(500);
+        setOnlyCurrentCountryCheckBox(false);
+        Thread.sleep(500);
+
+        final int newAmountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
+        assertEquals(initialAmountOfDisplayedEvents + 2, newAmountOfDisplayedEvents);
         homePageObject.clickLogoutButton();
     }
 
