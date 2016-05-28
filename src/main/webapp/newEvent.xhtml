@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core">
+
+<ui:composition template="layout.xhtml">
+    <ui:define name="content">
+        <h1 id="pagetitle">Create New Event</h1>
+        <hr/>
+        <h:form id="eventform">
+            <h:panelGrid columns="3" cellpadding="5">
+                <p:outputLabel for="title" value="Title : "/>
+                <p:inputText id="title" value="#{eventController.event.title}" required="true"/>
+                <p:message for="title"/>
+
+                <p:outputLabel for="country" value="Country :"/>
+                <h:selectOneMenu id="country" value="#{eventController.event.country}">
+                    <f:selectItems value="#{eventController.getCountries()}" />
+                </h:selectOneMenu>
+                <p:message for="country"/>
+
+                <p:outputLabel for="location" value="Location :"/>
+                <p:inputText id="location" value="#{eventController.event.location}" required="true"/>
+                <p:message for="location"/>
+
+                <p:outputLabel for="description" value="Description :"/>
+                <p:inputTextarea id="description" value="#{eventController.event.description}"/>
+                <p:message for="description"/>
+            </h:panelGrid>
+
+            <p:commandButton value="Submit" id="submit" ajax="false" action="#{eventController.registerNew}"
+                             icon="ui-icon ui-icon-disk"/>
+
+            <p:button value="Cancel" outcome="home"/>
+        </h:form>
+
+        <hr/>
+    </ui:define>
+</ui:composition>
+</html>
