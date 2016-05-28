@@ -13,15 +13,15 @@
     PG6100 Exam
     <p:separator/>
     <c:if test="#{!loginController.loggedIn}">
-        Not logged in &nbsp;
+        <span id="notLoggedInMessage">Not logged in &nbsp;</span>
         <h:button value="Log in" id="btnLogin" outcome="login"/>
     </c:if>
 
     <c:if test="#{loginController.loggedIn}">
-        Hi #{loginController.getLoggedInUserId()}!
+        <span id="welcomeMessage">Hi #{loginController.getLoggedInUserId()}!</span>
         <br/>
         <h:form id="logoutForm">
-            <h:commandButton value="Log Out" action="#{loginController.logOut}"/>
+            <h:commandButton id="btnLogout" value="Log Out" action="#{loginController.logOut}"/>
         </h:form>
     </c:if>
 

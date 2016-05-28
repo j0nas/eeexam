@@ -3,6 +3,8 @@ package no.jenjon13.eeexam.selenium.test;
 import no.jenjon13.eeexam.selenium.conf.Config;
 import no.jenjon13.eeexam.selenium.conf.JBossUtil;
 import no.jenjon13.eeexam.selenium.pageobject.HomePageObject;
+import no.jenjon13.eeexam.selenium.pageobject.LoginPageObject;
+import no.jenjon13.eeexam.selenium.pageobject.NewUserPageObject;
 import org.junit.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -11,17 +13,17 @@ import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.support.ui.Select;
 
 import java.io.File;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
 public class WebPageIT {
     private static WebDriver driver;
     private HomePageObject homePageObject;
+    private LoginPageObject loginPageObject;
+    private NewUserPageObject newUserPageObject;
 
     @BeforeClass
     public static void init() throws InterruptedException {
@@ -42,7 +44,7 @@ public class WebPageIT {
 
     @AfterClass
     public static void tearDown() {
-        driver.close();
+        driver.quit();
     }
 
     @Before
@@ -50,6 +52,9 @@ public class WebPageIT {
         assumeTrue(JBossUtil.isJBossUpAndRunning());
 
         homePageObject = new HomePageObject(driver);
+        loginPageObject = new LoginPageObject(driver);
+        newUserPageObject = new NewUserPageObject(driver);
+
         homePageObject.toIndexPage();
         assertTrue(homePageObject.isAtHomePage());
     }
@@ -64,27 +69,13 @@ public class WebPageIT {
 
     @Test
     public void testLoginLink() {
-        navigateToLoginPage();
-        assertTrue(isOnLoginPage());
-    }
-
-    private boolean isOnLoginPage() {
-        By byPageTitle = By.id("pagetitle");
-        WebElement element = driver.findElement(byPageTitle);
-        String elementText = element.getText();
-        return elementText.equals("Login");
-    }
-
-    private void navigateToLoginPage() {
-        By byBtnLoginId = By.id("btnLogin");
-        WebElement webElement = driver.findElement(byBtnLoginId);
-        webElement.click();
-        homePageObject.waitForPageToLoad();
+        loginPageObject.navigateToLoginPage();
+        assertTrue(loginPageObject.isOnLoginPage());
     }
 
     @Test
     public void testLoginWrongUser() {
-        navigateToLoginPage();
+        loginPageObject.navigateToLoginPage();
         By byTxtUsername = By.id("loginForm:txtUsername");
         WebElement usernameWebElement = driver.findElement(byTxtUsername);
         usernameWebElement.sendKeys("WRONG USERNAME");
@@ -98,38 +89,46 @@ public class WebPageIT {
         loginBtnWebElement.click();
 
         homePageObject.waitForPageToLoad();
-        assertTrue(isOnLoginPage());
+        assertTrue(loginPageObject.isOnLoginPage());
     }
+
 
     @Test
     public void testCreateUserFailDueToPasswordMismatch() throws Exception {
-        navigateToLoginPage();
-
-        By byBtnCreateNewUser = By.id("loginForm:btnCreateNewUser");
-        WebElement createNewUserWebElement = driver.findElement(byBtnCreateNewUser);
-        createNewUserWebElement.click();
-        homePageObject.waitForPageToLoad();
+        loginPageObject.navigateToLoginPage();
+        loginPageObject.clickLoginFormCreateNewUser();
 
         String currentUrl = driver.getCurrentUrl();
-
-        String[] fields = new String[] {"username", "password1", "password2", "firstname", "lastname"};
-        for (String field : fields) {
-            By byTxtField = By.id("userform:" + field);
-            WebElement txtWebElement = driver.findElement(byTxtField);
-            txtWebElement.sendKeys(field);
-        }
-
-        By bySelectCountry = By.id("userform:country");
-        WebElement selectWebElement = driver.findElement(bySelectCountry);
-        Select select = new Select(selectWebElement);
-        select.selectByVisibleText("Norway");
-
-        By byBtnSubmit = By.id("userform:submit");
-        WebElement submitWebElement = driver.findElement(byBtnSubmit);
-        submitWebElement.click();
-        homePageObject.waitForPageToLoad();
-
+        newUserPageObject.fillOutUserFormAndSubmit(false);
         String newUrl = driver.getCurrentUrl();
         Assert.assertTrue(newUrl.equals(currentUrl));
+    }
+
+    @Test
+    public void testCreateValidUser() throws Exception {
+        loginPageObject.navigateToLoginPage();
+        String currentUrl = driver.getCurrentUrl();
+        loginPageObject.clickLoginFormCreateNewUser();
+        newUserPageObject.fillOutUserFormAndSubmit(true);
+
+        String newUrl = driver.getCurrentUrl();
+        assertFalse(currentUrl.equals(newUrl));
+
+        By byWelcomeMessage = By.id("welcomeMessage");
+        String welcomeMessageText = driver.findElement(byWelcomeMessage).getText();
+        assertTrue(welcomeMessageText.contains("Hi "));
+
+        homePageObject.clickLogoutButton();
+
+        By byNotLoggedInMessage = By.id("notLoggedInMessage");
+        WebElement notLoggedInWebElement = driver.findElement(byNotLoggedInMessage);
+        String notLoggedInText = notLoggedInWebElement.getText();
+        assertTrue(notLoggedInText.contains("Not logged in"));
+    }
+
+    @Ignore
+    public void testLogin() throws Exception {
+        loginPageObject.navigateToLoginPage();
+        loginPageObject.clickLoginFormCreateNewUser();
     }
 }
