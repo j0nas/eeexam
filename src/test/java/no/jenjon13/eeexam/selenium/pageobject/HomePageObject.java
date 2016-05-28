@@ -29,4 +29,11 @@ public class HomePageObject extends BasePageObject {
         logoutBtnWebElement.click();
         waitForPageToLoad();
     }
+
+    public void clickCreateEventButton() {
+        final By btnCreateNewEvent = By.id("btnCreateNewEvent");
+        final WebElement btnCreateNewEventWebElement = driver.findElement(btnCreateNewEvent);
+        btnCreateNewEventWebElement.click();
+        waitForPageToLoad();
+    }
 }

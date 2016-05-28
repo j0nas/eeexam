@@ -11,7 +11,7 @@
         <h1 id="pagetitle">Event List Home Page</h1>
         <p:separator/>
         <c:if test="#{loginController.isLoggedIn()}">
-            <p:button value="Create Event" outcome="newEvent" />
+            <p:button id="btnCreateNewEvent" value="Create Event" outcome="newEvent" />
             <br/>
         </c:if>
 

@@ -2,6 +2,7 @@ package no.jenjon13.eeexam.selenium.test;
 
 import no.jenjon13.eeexam.selenium.conf.Config;
 import no.jenjon13.eeexam.selenium.conf.JBossUtil;
+import no.jenjon13.eeexam.selenium.pageobject.CreateEventPageObject;
 import no.jenjon13.eeexam.selenium.pageobject.HomePageObject;
 import no.jenjon13.eeexam.selenium.pageobject.LoginPageObject;
 import no.jenjon13.eeexam.selenium.pageobject.NewUserPageObject;
@@ -24,6 +25,7 @@ public class WebPageIT {
     private HomePageObject homePageObject;
     private LoginPageObject loginPageObject;
     private NewUserPageObject newUserPageObject;
+    private CreateEventPageObject createEventPageObject;
 
     @BeforeClass
     public static void init() throws InterruptedException {
@@ -49,6 +51,7 @@ public class WebPageIT {
         homePageObject = new HomePageObject(driver);
         loginPageObject = new LoginPageObject(driver);
         newUserPageObject = new NewUserPageObject(driver);
+        createEventPageObject = new CreateEventPageObject(driver);
 
         homePageObject.toIndexPage();
         assertTrue(homePageObject.isAtHomePage());
@@ -124,9 +127,7 @@ public class WebPageIT {
 
     @Test
     public void testLogin() throws Exception {
-        loginPageObject.navigateToLoginPage();
-        loginPageObject.clickLoginFormCreateNewUser();
-        String usernameAndPassword = newUserPageObject.fillOutUserFormAndSubmit(true);
+        String usernameAndPassword = createUser();
 
         homePageObject.clickLogoutButton();
         loginPageObject.navigateToLoginPage();
@@ -146,6 +147,30 @@ public class WebPageIT {
         assertTrue(welcomeMessageText.contains("Hi " + usernameAndPassword));
 
         homePageObject.clickLogoutButton();
+    }
+
+    private String createUser() {
+        loginPageObject.navigateToLoginPage();
+        loginPageObject.clickLoginFormCreateNewUser();
+        return newUserPageObject.fillOutUserFormAndSubmit(true);
+    }
+
+    @Test
+    public void testCreateOneEvent() throws Exception {
+        createUser();
+        final int amountOfDisplayedEvents = createEventPageObject.getAmountOfDisplayedEvents();
+        homePageObject.clickCreateEventButton();
+
+
+        final By byPageTitle = By.id("pagetitle");
+        final WebElement titleElement = driver.findElement(byPageTitle);
+        final String titleElementText = titleElement.getText();
+        assertTrue(titleElementText.contains("Create New Event"));
+
+        createEventPageObject.fillOutEventDataAndSubmit();
+
+        final int newAmountOfDisplayedEvents = createEventPageObject.getAmountOfDisplayedEvents();
+        assertEquals(amountOfDisplayedEvents + 1, newAmountOfDisplayedEvents);
     }
 
     private void enterTextIntoField(String textToEnter, String id) {
