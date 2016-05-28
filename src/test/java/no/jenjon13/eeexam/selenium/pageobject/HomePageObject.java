@@ -27,7 +27,13 @@ public class HomePageObject extends BasePageObject {
 
     public void clickLogoutButton() {
         By byBtnLogout = By.id("logoutForm:btnLogout");
-        WebElement logoutBtnWebElement = driver.findElement(byBtnLogout);
+
+        final List<WebElement> elements = driver.findElements(byBtnLogout);
+        if (elements.isEmpty()) {
+            return;
+        }
+
+        WebElement logoutBtnWebElement = elements.get(0);
         logoutBtnWebElement.click();
         waitForPageToLoad();
     }

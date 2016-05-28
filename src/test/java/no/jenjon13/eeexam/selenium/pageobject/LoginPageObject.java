@@ -29,5 +29,4 @@ public class LoginPageObject extends BasePageObject {
         createNewUserWebElement.click();
         waitForPageToLoad();
     }
-
 }
