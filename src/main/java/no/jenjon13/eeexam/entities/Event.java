@@ -3,8 +3,10 @@ package no.jenjon13.eeexam.entities;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
+@XmlRootElement
 @NamedQuery(name = Event.DELETE_ALL, query = "DELETE FROM Event")
 public class Event {
     public static final String DELETE_ALL = "events_delete_all";
