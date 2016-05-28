@@ -23,4 +23,10 @@ public class HomePageObject extends BasePageObject {
         return webElementText.equals("Event List Home Page");
     }
 
+    public void clickLogoutButton() {
+        By byBtnLogout = By.id("logoutForm:btnLogout");
+        WebElement logoutBtnWebElement = driver.findElement(byBtnLogout);
+        logoutBtnWebElement.click();
+        waitForPageToLoad();
+    }
 }
