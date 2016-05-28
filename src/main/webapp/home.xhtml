@@ -17,16 +17,12 @@
 
         <h2>Future Events</h2>
 
-        <c:if test="#{loginController.isLoggedIn()}">
-            <p:selectBooleanCheckbox value="true" />
-            <h:outputText value=" Only #{loginController.user.country}" />
-            <br/>
-        </c:if>
 
         <c:if test="#{eventController.hasNoEvents()}">
             No events yet :( Be the first one to create one!
         </c:if>
 
+        <h:form id="dataForm">
         <c:if test="#{!eventController.hasNoEvents()}">
             <p:dataTable id="eventdata" var="event" value="#{eventController.getEvents()}">
                 <p:column headerText="Country">
@@ -46,6 +42,15 @@
                 </p:column>
             </p:dataTable>
         </c:if>
+
+        <c:if test="#{eventController.shouldDisplayCountryCheckbox()}">
+            <p:selectBooleanCheckbox value="#{eventController.onlyShowForCurrentCountry}">
+                <p:ajax update="dataForm:eventdata" listener="#{eventController.updateDisplayedEvents()}" />
+            </p:selectBooleanCheckbox>
+            <h:outputText value=" Only #{loginController.user.country}" />
+            <br/>
+        </c:if>
+        </h:form>
 
         <p:separator/>
     </ui:define>
