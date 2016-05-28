@@ -44,7 +44,7 @@
         </c:if>
 
         <c:if test="#{eventController.shouldDisplayCountryCheckbox()}">
-            <p:selectBooleanCheckbox value="#{eventController.onlyShowForCurrentCountry}">
+            <p:selectBooleanCheckbox id="onlyCurrentCountry" value="#{eventController.onlyShowForCurrentCountry}">
                 <p:ajax update="dataForm:eventdata" listener="#{eventController.updateDisplayedEvents()}" />
             </p:selectBooleanCheckbox>
             <h:outputText value=" Only #{loginController.user.country}" />

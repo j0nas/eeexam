@@ -1,5 +1,6 @@
 package no.jenjon13.eeexam.selenium.test;
 
+import no.jenjon13.eeexam.ejb.EventEJB;
 import no.jenjon13.eeexam.selenium.conf.Config;
 import no.jenjon13.eeexam.selenium.conf.JBossUtil;
 import no.jenjon13.eeexam.selenium.pageobject.CreateEventPageObject;
@@ -15,6 +16,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import javax.inject.Inject;
 import java.io.File;
 
 import static org.junit.Assert.*;
@@ -26,6 +28,9 @@ public class WebPageIT {
     private LoginPageObject loginPageObject;
     private NewUserPageObject newUserPageObject;
     private CreateEventPageObject createEventPageObject;
+
+    @Inject
+    private EventEJB eventEJB;
 
     @BeforeClass
     public static void init() throws InterruptedException {
@@ -44,6 +49,11 @@ public class WebPageIT {
         }
     }
 
+    @AfterClass
+    public static void tearDown() {
+        driver.quit();
+    }
+
     @Before
     public void setUp() throws Exception {
         assumeTrue(JBossUtil.isJBossUpAndRunning());
@@ -55,11 +65,6 @@ public class WebPageIT {
 
         homePageObject.toIndexPage();
         assertTrue(homePageObject.isAtHomePage());
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        driver.quit();
     }
 
     @Test
@@ -159,18 +164,44 @@ public class WebPageIT {
     public void testCreateOneEvent() throws Exception {
         createUser();
         final int amountOfDisplayedEvents = createEventPageObject.getAmountOfDisplayedEvents();
-        homePageObject.clickCreateEventButton();
-
-
-        final By byPageTitle = By.id("pagetitle");
-        final WebElement titleElement = driver.findElement(byPageTitle);
-        final String titleElementText = titleElement.getText();
-        assertTrue(titleElementText.contains("Create New Event"));
-
-        createEventPageObject.fillOutEventDataAndSubmit();
-
+        createEvent("Norway");
         final int newAmountOfDisplayedEvents = createEventPageObject.getAmountOfDisplayedEvents();
+
         assertEquals(amountOfDisplayedEvents + 1, newAmountOfDisplayedEvents);
+        assertTrue(0 < eventEJB.deleteAllEvents());
+        homePageObject.clickLogoutButton();
+    }
+
+    private void createEvent(String country) {
+        homePageObject.clickCreateEventButton();
+        assertTrue(createEventPageObject.isOnEventPage());
+        createEventPageObject.fillOutEventDataAndSubmit(country);
+    }
+
+    @Test
+    public void testCreateEventInDifferentCountries() throws Exception {
+        createUser();
+        final int amountOfDisplayedEvents = createEventPageObject.getAmountOfDisplayedEvents();
+        createEvent("Norway");
+        createEvent("Sweden");
+
+        final By byOnlyCurrentCountryCheckbox = By.id("dataForm:onlyCurrentCountry");
+        final WebElement checkboxElement = driver.findElement(byOnlyCurrentCountryCheckbox);
+        final boolean onlyShowCurrentCountryChecked = checkboxElement.isSelected();
+
+        if (!onlyShowCurrentCountryChecked) {
+            checkboxElement.click();
+        }
+
+        final int newAmountOfEvents = createEventPageObject.getAmountOfDisplayedEvents();
+        assertEquals(amountOfDisplayedEvents + 1, newAmountOfEvents);
+
+        checkboxElement.click();
+        final int updatedAmountOfEvents = createEventPageObject.getAmountOfDisplayedEvents();
+        assertEquals(amountOfDisplayedEvents + 2, updatedAmountOfEvents);
+
+//        eventEJB.deleteAllEvents(); TODO
+        homePageObject.clickLogoutButton();
     }
 
     private void enterTextIntoField(String textToEnter, String id) {

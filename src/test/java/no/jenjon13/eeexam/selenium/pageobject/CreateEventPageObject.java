@@ -13,7 +13,7 @@ public class CreateEventPageObject extends BasePageObject {
     }
 
 
-    public void fillOutEventDataAndSubmit() {
+    public void fillOutEventDataAndSubmit(String country) {
         final String[] fields = new String[] {"title", "location", "description"};
         String testString = "TEST " + ((int) (Math.random() * 10000));
 
@@ -27,12 +27,25 @@ public class CreateEventPageObject extends BasePageObject {
         By bySelectCountry = By.id("eventform:country");
         WebElement selectWebElement = driver.findElement(bySelectCountry);
         Select select = new Select(selectWebElement);
-        select.selectByVisibleText("Norway");
+        select.selectByVisibleText(country);
 
         By byBtnSubmit = By.id("eventform:submit");
         WebElement submitWebElement = driver.findElement(byBtnSubmit);
         submitWebElement.click();
         waitForPageToLoad();
+    }
+
+    public boolean isOnEventPage() {
+        final By byPageTitle = By.id("pagetitle");
+        final List<WebElement> titleElements = driver.findElements(byPageTitle);
+
+        if (titleElements.isEmpty()) {
+            return false;
+        }
+
+        final WebElement firstElement = titleElements.get(0);
+        final String titleElementText = firstElement.getText();
+        return titleElementText.contains("Create New Event");
     }
 
     public int getAmountOfDisplayedEvents() {

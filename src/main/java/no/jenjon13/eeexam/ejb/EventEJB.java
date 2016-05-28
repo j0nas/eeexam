@@ -33,6 +33,7 @@ public class EventEJB implements Serializable {
     }
 
     public List<Event> getAllEvents() {
+        // TODO -> named
         final TypedQuery<Event> typedQuery = em.createQuery("SELECT e FROM Event e", Event.class);
         return typedQuery.getResultList();
     }
