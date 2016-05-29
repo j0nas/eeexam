@@ -1,5 +1,11 @@
 package no.jenjon13.eeexam.selenium.test;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.RemoteMappingBuilder;
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.github.tomakehurst.wiremock.client.UrlMatchingStrategy;
+import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import no.jenjon13.eeexam.ejb.EventEJB;
 import no.jenjon13.eeexam.selenium.conf.Config;
 import no.jenjon13.eeexam.selenium.conf.JBossUtil;
@@ -9,6 +15,7 @@ import no.jenjon13.eeexam.selenium.pageobject.LoginPageObject;
 import no.jenjon13.eeexam.selenium.pageobject.NewUserPageObject;
 import org.junit.*;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxBinary;
@@ -18,13 +25,18 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Scanner;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
 public class WebPageIT {
     private static WebDriver driver;
+    private static WireMockServer wireMockServer;
+
     private HomePageObject homePageObject;
     private LoginPageObject loginPageObject;
     private NewUserPageObject newUserPageObject;
@@ -33,6 +45,7 @@ public class WebPageIT {
     @Inject
     private EventEJB eventEJB;
     private boolean toggled;
+
 
     @BeforeClass
     public static void init() throws InterruptedException {
@@ -49,11 +62,30 @@ public class WebPageIT {
         while (i++ < 30 && !JBossUtil.isJBossUpAndRunning()) {
             Thread.sleep(1_000);
         }
+
+        final ConsoleNotifier consoleNotifier = new ConsoleNotifier(true);
+        final WireMockConfiguration configuration = WireMockConfiguration
+                .wireMockConfig()
+                .port(8099)
+                .notifier(consoleNotifier);
+        wireMockServer = new WireMockServer(configuration);
+        wireMockServer.start();
+
+        final InputStream countriesJson = WebPageIT.class.getResourceAsStream("/countries.json");
+        final String body = new Scanner(countriesJson, "UTF-8").useDelimiter("\\A").next();
+
+        final UrlMatchingStrategy matching = urlMatching("/rest/v1/all");
+        final ResponseDefinitionBuilder responseBuilder = aResponse()
+                .withHeader("Content-Type", "application/json;charset=utf-8")
+                .withBody(body);
+        final RemoteMappingBuilder mappingBuilder = get(matching).willReturn(responseBuilder);
+        wireMockServer.stubFor(mappingBuilder);
     }
 
     @AfterClass
     public static void tearDown() {
         driver.quit();
+        wireMockServer.stop();
     }
 
     @Before
@@ -168,7 +200,6 @@ public class WebPageIT {
         homePageObject.waitForPageToLoad();
         homePageObject.toIndexPage();
 
-
         loginPageObject.navigateToLoginPage();
         loginPageObject.clickLoginFormCreateNewUser();
         return newUserPageObject.fillOutUserFormAndSubmit(true);
@@ -182,11 +213,9 @@ public class WebPageIT {
         final int newAmountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
 
         assertEquals(amountOfDisplayedEvents + 1, newAmountOfDisplayedEvents);
-//        assertTrue(0 < eventEJB.deleteAllEvents());
         homePageObject.clickLogoutButton();
     }
 
-    // TODO remove return from this if not used
     private String createEvent(String country) {
         homePageObject.clickCreateEventButton();
         assertTrue(createEventPageObject.isOnEventPage());
@@ -210,7 +239,6 @@ public class WebPageIT {
         final int updatedAmountOfEvents = homePageObject.getAmountOfDisplayedEvents();
         assertEquals(amountOfDisplayedEvents + 1, updatedAmountOfEvents);
 
-//        eventEJB.deleteAllEvents(); TODO
         homePageObject.clickLogoutButton();
     }
 
@@ -222,7 +250,7 @@ public class WebPageIT {
         }
 
         if (!toggled) {
-            checked = !checked; // TODO
+            checked = !checked;
             toggled = true;
         }
 
@@ -230,7 +258,6 @@ public class WebPageIT {
 
         final boolean onlyShowCurrentCountryChecked = checkboxElement.isSelected();
 
-        // TODO xor?
         if (onlyShowCurrentCountryChecked && !checked) {
             checkboxElement.click();
         }
@@ -261,6 +288,35 @@ public class WebPageIT {
 
         final int newAmountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
         assertEquals(initialAmountOfDisplayedEvents + 2, newAmountOfDisplayedEvents);
+        homePageObject.clickLogoutButton();
+    }
+
+    // mvn clean verify -Dit.test=WebPageIT#testCreateUserWithFakeCountry test
+    @Ignore
+    public void testCreateUserWithFakeCountry() throws Exception {
+        createUser();
+
+        Thread.sleep(500);
+        setOnlyCurrentCountryCheckBox(false);
+        Thread.sleep(500);
+        final int initialAmountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
+
+        boolean exceptionCaught = false;
+        try {
+            createEvent("wrong");
+        } catch (NoSuchElementException e) {
+            exceptionCaught = true;
+        }
+        assertTrue(exceptionCaught);
+
+        homePageObject.toIndexPage();
+        Thread.sleep(500);
+        assertEquals(initialAmountOfDisplayedEvents, homePageObject.getAmountOfDisplayedEvents());
+        createEvent("Fake Land");
+
+        Thread.sleep(500);
+        assertEquals(initialAmountOfDisplayedEvents + 1, homePageObject.getAmountOfDisplayedEvents());
+
         homePageObject.clickLogoutButton();
     }
 

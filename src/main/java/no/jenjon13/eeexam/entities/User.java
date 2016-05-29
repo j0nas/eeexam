@@ -1,11 +1,9 @@
 package no.jenjon13.eeexam.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 
 @Entity
@@ -33,6 +31,9 @@ public class User {
     private String middleName;
     @NotNull
     private String lastName;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<Event> attendingEvents;
 
     public String getUserId() {
         return userId;
@@ -88,5 +89,13 @@ public class User {
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
+    }
+
+    public List<Event> getAttendingEvents() {
+        return attendingEvents;
+    }
+
+    public void setAttendingEvents(List<Event> attendingEvents) {
+        this.attendingEvents = attendingEvents;
     }
 }

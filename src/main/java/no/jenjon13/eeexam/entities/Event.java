@@ -3,8 +3,11 @@ package no.jenjon13.eeexam.entities;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 @Entity
+@XmlRootElement
 @NamedQuery(name = Event.DELETE_ALL, query = "DELETE FROM Event")
 public class Event {
     public static final String DELETE_ALL = "events_delete_all";
@@ -26,6 +29,9 @@ public class Event {
 
     @Size(max = 2500)
     private String description;
+
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "attendingEvents")
+    private List<User> attendants;
 
     public String getTitle() {
         return title;
@@ -61,5 +67,13 @@ public class Event {
 
     public long getId() {
         return id;
+    }
+
+    public List<User> getAttendants() {
+        return attendants;
+    }
+
+    public void setAttendants(List<User> attendants) {
+        this.attendants = attendants;
     }
 }

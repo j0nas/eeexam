@@ -26,10 +26,9 @@ public class CountryEJB implements Serializable {
         }
 
         countries = new ArrayList<>();
-        URI uri = UriBuilder
-                .fromUri("http://restcountries.eu/rest/v1/all")
-                .port(80)
-                .build();
+
+        final String restCountriesAddress = System.getProperty("restCountriesAddress", "restcountries.eu");
+        URI uri = UriBuilder.fromUri("http://" + restCountriesAddress + "/rest/v1/all").build();
         Client client = ClientBuilder.newClient();
         Response response = client
                 .target(uri)

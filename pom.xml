@@ -19,6 +19,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>2.0.10-beta</version>
+        </dependency>
+        
+        <dependency>
             <groupId>org.glassfish.main.extras</groupId>
             <artifactId>glassfish-embedded-all</artifactId>
             <version>4.1.1</version>
@@ -136,6 +142,11 @@
                             <goal>start</goal>
                             <goal>deploy</goal>
                         </goals>
+                        <configuration>
+                            <javaOpts>
+                                <javaOpt>-DrestCountriesAddress=localhost:8099</javaOpt>
+                            </javaOpts>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>shutdown</id>
