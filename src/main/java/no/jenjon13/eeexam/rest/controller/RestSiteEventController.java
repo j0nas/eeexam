@@ -3,22 +3,18 @@ package no.jenjon13.eeexam.rest.controller;
 import no.jenjon13.eeexam.ejb.CountryEJB;
 import no.jenjon13.eeexam.ejb.EventEJB;
 import no.jenjon13.eeexam.entities.Event;
-import no.jenjon13.eeexam.rest.util.EventXMLWrapper;
+import no.jenjon13.eeexam.rest.util.Events;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.APPLICATION_XML;
-
-@Stateless
-@Produces({APPLICATION_JSON, APPLICATION_XML})
-@Consumes({APPLICATION_JSON, APPLICATION_XML})
 @Path("/events")
+@Stateless
 public class RestSiteEventController {
     private static final String EVENT_ID_PARAM = "id";
     private static final String EVENT_COUNTRY_PARAM = "country";
@@ -30,12 +26,13 @@ public class RestSiteEventController {
     private CountryEJB countryEJB;
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("all")
-    public Response all(@QueryParam(EVENT_COUNTRY_PARAM) String country) {
+    public Response allAsJson(@QueryParam(EVENT_COUNTRY_PARAM) String country) {
         final List<Event> events = eventEJB.getAllEvents();
 
         if (country == null) {
-            final EventXMLWrapper eventList = new EventXMLWrapper(events);
+            final Events eventList = new Events(events);
             return Response.ok(eventList).build();
         }
 
@@ -51,13 +48,37 @@ public class RestSiteEventController {
             }
         }
 
-        final EventXMLWrapper filteredWrappedEventList = new EventXMLWrapper(filteredEventList);
+        final Events filteredWrappedEventList = new Events(filteredEventList);
         return Response.ok(filteredWrappedEventList).build();
     }
 
-    // TODO @NotNull queryparam?
     @GET
-    public Response getEvent(@QueryParam(EVENT_ID_PARAM) String idString) {
+    @Produces(MediaType.APPLICATION_XML)
+    @Path("all")
+    public Events allAsXml(@QueryParam(EVENT_COUNTRY_PARAM) String country) {
+        final List<Event> events = eventEJB.getAllEvents();
+        if (country == null) {
+            return new Events(events);
+        }
+
+        final List<String> countryList = countryEJB.getCountries();
+        if (!countryList.contains(country)) {
+            throw new BadRequestException();
+        }
+
+        List<Event> filteredEventList = new ArrayList<>();
+        for (Event event : events) {
+            if (event.getCountry().equalsIgnoreCase(country)) {
+                filteredEventList.add(event);
+            }
+        }
+
+        return new Events(filteredEventList);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEventAsJson(@QueryParam(EVENT_ID_PARAM) String idString) {
         final Long id;
         try {
             id = Long.valueOf(idString);
@@ -73,9 +94,21 @@ public class RestSiteEventController {
         return Response.ok(event).build();
     }
 
-    @POST
-    public Response save(Event event) {
-        final boolean createdEvent = eventEJB.createEvent(event);
-        return Response.ok(createdEvent).build();
+    @GET
+    @Produces(MediaType.APPLICATION_XML)
+    public Event getEventAsXml(@QueryParam(EVENT_ID_PARAM) String idString) {
+        final Long id;
+        try {
+            id = Long.valueOf(idString);
+        } catch (NumberFormatException e) {
+            throw new BadRequestException();
+        }
+
+        final Event event = eventEJB.getEvent(id);
+        if (event == null) {
+            throw new NotFoundException();
+        }
+
+        return event;
     }
 }

@@ -7,6 +7,8 @@ import com.github.tomakehurst.wiremock.client.UrlMatchingStrategy;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import no.jenjon13.eeexam.ejb.EventEJB;
+import no.jenjon13.eeexam.entities.Event;
+import no.jenjon13.eeexam.rest.util.Events;
 import no.jenjon13.eeexam.selenium.conf.Config;
 import no.jenjon13.eeexam.selenium.conf.JBossUtil;
 import no.jenjon13.eeexam.selenium.pageobject.CreateEventPageObject;
@@ -14,7 +16,6 @@ import no.jenjon13.eeexam.selenium.pageobject.HomePageObject;
 import no.jenjon13.eeexam.selenium.pageobject.LoginPageObject;
 import no.jenjon13.eeexam.selenium.pageobject.NewUserPageObject;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
@@ -24,8 +25,16 @@ import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import javax.inject.Inject;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -40,6 +49,8 @@ public class RestIT {
     private static LoginPageObject loginPageObject;
     private static NewUserPageObject newUserPageObject;
     private static CreateEventPageObject createEventPageObject;
+
+    private static List<Event> createdEvents = new ArrayList<>();
 
     @Inject
     private EventEJB eventEJB;
@@ -82,6 +93,7 @@ public class RestIT {
         assumeTrue(JBossUtil.isJBossUpAndRunning());
 
         instantiatePageObjects();
+
         homePageObject.toIndexPage();
         assertTrue(homePageObject.isAtHomePage());
 
@@ -96,7 +108,7 @@ public class RestIT {
     }
 
     private static void createTestEventsAndUsers() {
-        final String[] countries = new String[] { "Belgium", "Spain", "Spain"};
+        final String[] countries = new String[]{"Belgium"}; //, "Spain", "Spain"}; TODO
         for (String country : countries) {
             createUser();
             createEvent(country);
@@ -106,7 +118,8 @@ public class RestIT {
 
     private static void createEvent(String country) {
         homePageObject.clickCreateEventButton();
-        createEventPageObject.fillOutEventDataAndSubmit(country);
+        final Event event = createEventPageObject.fillOutEventDataAndSubmitAndReturnEvent(country);
+        createdEvents.add(event);
     }
 
     private static void createUser() {
@@ -120,19 +133,15 @@ public class RestIT {
         driver.quit();
     }
 
-    @Before
-    public void setUp() throws Exception {
-        toggled = false;
-        assumeTrue(JBossUtil.isJBossUpAndRunning());
-
-
-        homePageObject.toIndexPage();
-        assertTrue(homePageObject.isAtHomePage());
-    }
-
     @Test
     public void testGetAllXml() throws Exception {
-        System.out.println("Sleeping");
-        Thread.sleep(50000);
+        URI uri = UriBuilder.fromUri("http://localhost/pg6100_exam/rs/events/all").port(8080).build();
+        Client client = ClientBuilder.newClient();
+        Response response = client.target(uri).request(MediaType.APPLICATION_XML).get();
+
+        final Events events = response.readEntity(Events.class);
+        for (Event event : createdEvents) {
+            assertTrue(events.contains(event));
+        }
     }
 }
