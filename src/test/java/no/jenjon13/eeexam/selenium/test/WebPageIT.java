@@ -85,6 +85,7 @@ public class WebPageIT {
     @AfterClass
     public static void tearDown() {
         driver.quit();
+        wireMockServer.stop();
     }
 
     @Before
@@ -212,11 +213,9 @@ public class WebPageIT {
         final int newAmountOfDisplayedEvents = homePageObject.getAmountOfDisplayedEvents();
 
         assertEquals(amountOfDisplayedEvents + 1, newAmountOfDisplayedEvents);
-//        assertTrue(0 < eventEJB.deleteAllEvents());
         homePageObject.clickLogoutButton();
     }
 
-    // TODO remove return from this if not used
     private String createEvent(String country) {
         homePageObject.clickCreateEventButton();
         assertTrue(createEventPageObject.isOnEventPage());
@@ -240,7 +239,6 @@ public class WebPageIT {
         final int updatedAmountOfEvents = homePageObject.getAmountOfDisplayedEvents();
         assertEquals(amountOfDisplayedEvents + 1, updatedAmountOfEvents);
 
-//        eventEJB.deleteAllEvents(); TODO
         homePageObject.clickLogoutButton();
     }
 
@@ -252,7 +250,7 @@ public class WebPageIT {
         }
 
         if (!toggled) {
-            checked = !checked; // TODO
+            checked = !checked;
             toggled = true;
         }
 
@@ -260,7 +258,6 @@ public class WebPageIT {
 
         final boolean onlyShowCurrentCountryChecked = checkboxElement.isSelected();
 
-        // TODO xor?
         if (onlyShowCurrentCountryChecked && !checked) {
             checkboxElement.click();
         }
@@ -294,7 +291,6 @@ public class WebPageIT {
         homePageObject.clickLogoutButton();
     }
 
-    // TODO this test is impure, but works when run standalone
     // mvn clean verify -Dit.test=WebPageIT#testCreateUserWithFakeCountry test
     @Ignore
     public void testCreateUserWithFakeCountry() throws Exception {

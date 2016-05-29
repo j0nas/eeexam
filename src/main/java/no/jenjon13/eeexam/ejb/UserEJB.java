@@ -35,6 +35,10 @@ public class UserEJB implements Serializable {
         return true;
     }
 
+    public User update(User user) {
+        return em.merge(user);
+    }
+
 
     public boolean login(String userId, String password) {
         if (userId == null || userId.isEmpty() || password == null || password.isEmpty()) {

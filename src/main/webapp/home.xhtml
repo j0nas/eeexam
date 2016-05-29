@@ -35,10 +35,12 @@
                     <h:outputText value="#{event.location}"/>
                 </p:column>
                 <p:column headerText="Participants">
-                    0
+                    <h:outputText value="#{event.attendants.size()}"/>
                 </p:column>
                 <p:column headerText="Going">
-                    <p:selectBooleanCheckbox />
+                    <p:selectBooleanCheckbox value="#{eventController.isGoing(event.id)}">
+                        <p:ajax update="dataForm:eventdata" listener="#{eventController.toggleGoing(event.id)}" />
+                    </p:selectBooleanCheckbox>
                 </p:column>
             </p:dataTable>
         </c:if>

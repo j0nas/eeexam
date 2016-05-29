@@ -3,6 +3,7 @@ package no.jenjon13.eeexam.controllers;
 import no.jenjon13.eeexam.ejb.CountryEJB;
 import no.jenjon13.eeexam.ejb.EventEJB;
 import no.jenjon13.eeexam.entities.Event;
+import no.jenjon13.eeexam.entities.User;
 
 import javax.enterprise.inject.Model;
 import javax.inject.Inject;
@@ -79,5 +80,21 @@ public class EventController implements Serializable {
 
     public boolean shouldDisplayCountryCheckbox() {
         return loginController.isLoggedIn() && !hasNoEvents();
+    }
+
+    public boolean isGoing(long eventId) {
+        final Event event = eventEJB.getEvent(eventId);
+        return event.getAttendants().contains(loginController.getUser());
+    }
+
+    public void toggleGoing(long eventId) {
+        final User user = loginController.getUser();
+
+        final Event event = eventEJB.getEvent(eventId);
+        user.getAttendingEvents().add(event);
+        loginController.updateUser(user);
+
+        event.getAttendants().add(user);
+        eventEJB.update(event);
     }
 }

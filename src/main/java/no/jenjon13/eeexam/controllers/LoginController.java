@@ -78,4 +78,8 @@ public class LoginController implements Serializable {
     public void setFormPassword(String formPassword) {
         this.formPassword = formPassword;
     }
+
+    public User updateUser(User user) {
+        return userEJB.update(user);
+    }
 }

@@ -12,7 +12,6 @@ public abstract class BasePageObject {
         this.driver = driver;
     }
 
-    // TODO check for result of this method
     public Boolean waitForPageToLoad() {
         JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         WebDriverWait wait = new WebDriverWait(driver, 10);

@@ -131,6 +131,7 @@ public class RestIT {
     @AfterClass
     public static void tearDown() {
         driver.quit();
+        wireMockServer.stop();
     }
 
     @Test
@@ -143,10 +144,6 @@ public class RestIT {
         final String events = response.readEntity(String.class);
         assertTrue(events.contains("<event><country>Belgium</country>"));
         assertTrue(events.contains("<event><country>Spain</country>"));
-
-//        for (Event event : createdEvents) {
-//            assertTrue(events.contains(event));
-//        }
     }
 
     @Test
