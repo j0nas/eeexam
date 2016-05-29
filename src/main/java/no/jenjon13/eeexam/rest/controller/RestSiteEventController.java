@@ -55,10 +55,10 @@ public class RestSiteEventController {
     @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("all")
-    public Events allAsXml(@QueryParam(EVENT_COUNTRY_PARAM) String country) {
+    public List<Event> allAsXml(@QueryParam(EVENT_COUNTRY_PARAM) String country) {
         final List<Event> events = eventEJB.getAllEvents();
         if (country == null) {
-            return new Events(events);
+            return events;
         }
 
         final List<String> countryList = countryEJB.getCountries();
@@ -73,7 +73,7 @@ public class RestSiteEventController {
             }
         }
 
-        return new Events(filteredEventList);
+        return filteredEventList;
     }
 
     @GET

@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import no.jenjon13.eeexam.ejb.EventEJB;
 import no.jenjon13.eeexam.entities.Event;
-import no.jenjon13.eeexam.rest.util.Events;
 import no.jenjon13.eeexam.selenium.conf.Config;
 import no.jenjon13.eeexam.selenium.conf.JBossUtil;
 import no.jenjon13.eeexam.selenium.pageobject.CreateEventPageObject;
@@ -38,6 +37,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
@@ -108,7 +108,7 @@ public class RestIT {
     }
 
     private static void createTestEventsAndUsers() {
-        final String[] countries = new String[]{"Belgium"}; //, "Spain", "Spain"}; TODO
+        final String[] countries = new String[]{"Belgium", "Spain", "Spain"};
         for (String country : countries) {
             createUser();
             createEvent(country);
@@ -138,10 +138,47 @@ public class RestIT {
         URI uri = UriBuilder.fromUri("http://localhost/pg6100_exam/rs/events/all").port(8080).build();
         Client client = ClientBuilder.newClient();
         Response response = client.target(uri).request(MediaType.APPLICATION_XML).get();
+//        final List<Event> events = response.readEntity(String.class);
 
-        final Events events = response.readEntity(Events.class);
-        for (Event event : createdEvents) {
-            assertTrue(events.contains(event));
-        }
+        final String events = response.readEntity(String.class);
+        assertTrue(events.contains("<event><country>Belgium</country>"));
+        assertTrue(events.contains("<event><country>Spain</country>"));
+
+//        for (Event event : createdEvents) {
+//            assertTrue(events.contains(event));
+//        }
+    }
+
+    @Test
+    public void testGetCountryAXml() throws Exception {
+        final Response response = queryForEventsInCountry("Spain");
+        final String events = response.readEntity(String.class);
+        assertTrue(events.contains("<event><country>Spain</country>"));
+        assertFalse(events.contains("<event><country>Belgium</country>"));
+    }
+
+    @Test
+    public void testGetCountryBXml() throws Exception {
+        Response response = queryForEventsInCountry("Belgium");
+        final String events = response.readEntity(String.class);
+        assertTrue(events.contains("<event><country>Belgium</country>"));
+        assertFalse(events.contains("<event><country>Spain</country>"));
+    }
+
+    @Test
+    public void testGetAllJson() throws Exception {
+        final URI uri = UriBuilder.fromUri("http://localhost/pg6100_exam/rs/events/all").port(8080).build();
+        final Client client = ClientBuilder.newClient();
+        final Response response = client.target(uri).request(MediaType.APPLICATION_JSON).get();
+
+        final String events = response.readEntity(String.class);
+        assertTrue(events.contains("Belgium"));
+        assertTrue(events.contains("Spain"));
+    }
+
+    private Response queryForEventsInCountry(String country) {
+        URI uri = UriBuilder.fromUri("http://localhost/pg6100_exam/rs/events/all?country=" + country).port(8080).build();
+        Client client = ClientBuilder.newClient();
+        return client.target(uri).request(MediaType.APPLICATION_XML).get();
     }
 }
